@@ -55,7 +55,7 @@ async def root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 
-@app.get("/all_stores", response_model=Page[dict])
+@app.get("/stores", response_model=Page[dict])
 async def read_stores(params: Params = Depends()):
     stores = await get_stores_cache()
     return paginate(stores, params)
