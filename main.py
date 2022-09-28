@@ -2,11 +2,10 @@ import json
 from pydantic import BaseSettings
 from waffle import get_stores
 import aioredis
-from starlette.responses import FileResponse
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from fastapi_utils.tasks import repeat_every
 
 description = """
 Waffle House Index API helps show what Waffle Houses are closed in natural disasters.
@@ -46,6 +45,7 @@ async def get_stores_cache():
 
 
 @app.on_event('startup')
+@repeat_every(seconds=300)  # 5 min
 async def startup_event():
     await redis.set('stores', json.dumps(get_stores()))
 
