@@ -8,7 +8,24 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-app = FastAPI()
+description = """
+Waffle House Index API helps show what Waffle Houses are closed in natural disasters.
+"""
+
+app = FastAPI(title="Waffle House Index API",
+              description=description,
+              version="0.0.1",
+              # terms_of_service="http://example.com/terms/",
+              # contact={
+              #     "name": "Deadpoolio the Amazing",
+              #     "url": "http://x-force.example.com/contact/",
+              #     "email": "dp@x-force.example.com",
+              # },
+              # license_info={
+              #     "name": "Apache 2.0",
+              #     "url": "https://www.apache.org/licenses/LICENSE-2.0.html",
+              # },
+              )
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
