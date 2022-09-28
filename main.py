@@ -56,8 +56,14 @@ async def root(request: Request):
 
 
 @app.get("/stores", response_model=Page[dict])
-async def read_stores(params: Params = Depends()):
+async def read_stores(state: str = None, params: Params = Depends()):
     stores = await get_stores_cache()
+    filter_stores = []
+    if state:
+        for store in stores:
+            if store['state'].lower() == state.lower():
+                filter_stores.append(store)
+        return paginate(filter_stores, params)
     return paginate(stores, params)
 
 
