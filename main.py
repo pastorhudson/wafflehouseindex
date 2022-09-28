@@ -33,13 +33,13 @@ async def startup_event():
     await redis.set('stores', json.dumps(get_stores()))
 
 
-@app.get("/")
-async def read_root(request: Request):
+@app.get("/", include_in_schema=False)
+async def root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 
 @app.get("/stores")
-async def read_root():
+async def read_stores():
     return {"stores": await get_stores_cache()}
 
 
