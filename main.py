@@ -1,20 +1,21 @@
 import json
-from pprint import pprint
-from typing import Union
-
-from fastapi import FastAPI
 from pydantic import BaseSettings
-
 from waffle import get_stores
 import aioredis
-import httpx
+from starlette.responses import FileResponse
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+
 app = FastAPI()
+app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="templates")
 
 
 class Config(BaseSettings):
     # The default URL expects the app to run using Docker and docker-compose.
     redis_url: str = 'redis://127.0.0.1:6379'
-
 
 
 config = Config()
@@ -33,11 +34,16 @@ async def startup_event():
 
 
 @app.get("/")
+async def read_root(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
+
+
+@app.get("/stores")
 async def read_root():
     return {"stores": await get_stores_cache()}
 
 
-@app.get("/stores/{store_number}")
+@app.get("/store/{store_number}")
 async def read_item(store_number: int,):
     for store in await get_stores_cache():
         if store['name'].split('#')[1] == str(store_number):
@@ -46,7 +52,7 @@ async def read_item(store_number: int,):
         return {}
 
 
-@app.get("/closed")
+@app.get("/stores/closed")
 async def get_closed_stores():
     for store in await get_stores_cache():
         print(store['is_temporarily_closed'])
