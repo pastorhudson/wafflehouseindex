@@ -2,10 +2,11 @@ import json
 from pydantic import BaseSettings
 from waffle import get_stores
 import aioredis
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Depends
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi_utils.tasks import repeat_every
+from fastapi_pagination import Page, add_pagination, paginate, Params
 
 description = """
 Waffle House Index API helps show what Waffle Houses are closed in natural disasters.
@@ -40,7 +41,6 @@ redis = aioredis.from_url(config.redis_url, decode_responses=True)
 
 async def get_stores_cache():
     stores = await redis.get('stores')
-
     return json.loads(stores)['markers']
 
 
@@ -55,9 +55,10 @@ async def root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 
-@app.get("/stores")
-async def read_stores():
-    return {"stores": await get_stores_cache()}
+@app.get("/all_stores", response_model=Page[dict])
+async def read_stores(params: Params = Depends()):
+    stores = await get_stores_cache()
+    return paginate(stores, params)
 
 
 @app.get("/store/{store_number}")
@@ -72,7 +73,6 @@ async def read_item(store_number: int,):
 @app.get("/stores/closed")
 async def get_closed_stores():
     for store in await get_stores_cache():
-        print(store['is_temporarily_closed'])
         if store['is_temporarily_closed'] is not None and store['is_temporarily_closed'] != 0:
             return store
     else:
