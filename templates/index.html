@@ -114,7 +114,7 @@
                      <div class="hero-inner">
 						<div class="hero-copy">
                     <h2 class="mt-0">WaffleHouseIndex.live</h2>
-	                        <p class="hero-paragraph">This is an unaffiliated hobby project to make Waffle House status easily accessible .</p>
+	                        <p class="hero-paragraph text-sm">The Waffle House Index is an informal metric named after the Waffle House restaurant chain to determine the effect of a storm and the likely scale of assistance required for disaster recovery. It was coined by former administrator Craig Fugate of the Federal Emergency Management Agency (FEMA). The metric is unofficially used by FEMA to inform disaster response.</p>
                     <h3 class="hero-title">{% if state_name %}{{ state_name }}{% endif %} Closings: {{ closed_stores.stores|length }}</h3>
                         </div></div>
                             <div hx-target="this"
@@ -146,14 +146,14 @@
       <th scope="row" style="color: #dca325;"><a style="color: #dca325;" href="https://wafflehouse.locally.com/store/{{store.store_id}}">{{ store.name }}</a></th>
       <td>{{ store.state }}</td>
       <td>{{ store.city }}</td>
-      <td>{{ store.status }}</td>
+      <td>{% if store.status == 'Closed - Closed' %}{{ store.status }}*{% else %}}{{ store.status }}{% endif %}</td>
     <td>{{ store.address }}</td>
     </tr>
   {% endfor %}
 
   </tbody>
 </table>
-
+<p class="text-xs">*Closed - Closed may mean site is permanently closed or closed for remodel.</p>
                 </div>
             </section>
                        <section class="hero">
@@ -171,21 +171,21 @@
 	                        <p class="hero-paragraph">This is an unaffiliated hobby project to make Waffle House status easily accessible .</p>
 	                        <div class="hero-cta"><a class="button button-primary" href="/docs">Read The Docs</a><a class="button" href="https://wafflehouse.com">Go To Waffle House</a></div>
 						</div>
-						<div class="hero-figure anime-element">
-							<svg class="placeholder" width="528" height="396" viewBox="0 0 528 396">
-								<rect width="528" height="396" style="fill:transparent;" />
-							</svg>
-							<div class="hero-figure-box hero-figure-box-01" data-rotation="45deg"></div>
-							<div class="hero-figure-box hero-figure-box-02" data-rotation="-45deg"></div>
-							<div class="hero-figure-box hero-figure-box-03" data-rotation="0deg"></div>
-							<div class="hero-figure-box hero-figure-box-04" data-rotation="-135deg"></div>
-							<div class="hero-figure-box hero-figure-box-05"></div>
-							<div class="hero-figure-box hero-figure-box-06"></div>
-							<div class="hero-figure-box hero-figure-box-07"></div>
-							<div class="hero-figure-box hero-figure-box-08" data-rotation="-22deg"></div>
-							<div class="hero-figure-box hero-figure-box-09" data-rotation="-52deg"></div>
-							<div class="hero-figure-box hero-figure-box-10" data-rotation="-50deg"></div>
-						</div>
+<!--						<div class="hero-figure anime-element">-->
+<!--							<svg class="placeholder" width="528" height="396" viewBox="0 0 528 396">-->
+<!--								<rect width="528" height="396" style="fill:transparent;" />-->
+<!--							</svg>-->
+<!--							<div class="hero-figure-box hero-figure-box-01" data-rotation="45deg"></div>-->
+<!--							<div class="hero-figure-box hero-figure-box-02" data-rotation="-45deg"></div>-->
+<!--							<div class="hero-figure-box hero-figure-box-03" data-rotation="0deg"></div>-->
+<!--							<div class="hero-figure-box hero-figure-box-04" data-rotation="-135deg"></div>-->
+<!--							<div class="hero-figure-box hero-figure-box-05"></div>-->
+<!--							<div class="hero-figure-box hero-figure-box-06"></div>-->
+<!--							<div class="hero-figure-box hero-figure-box-07"></div>-->
+<!--							<div class="hero-figure-box hero-figure-box-08" data-rotation="-22deg"></div>-->
+<!--							<div class="hero-figure-box hero-figure-box-09" data-rotation="-52deg"></div>-->
+<!--							<div class="hero-figure-box hero-figure-box-10" data-rotation="-50deg"></div>-->
+<!--						</div>-->
                     </div>
                 </div>
             </section>
