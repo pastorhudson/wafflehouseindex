@@ -115,7 +115,6 @@
 						<div class="hero-copy">
                     <h2 class="mt-0"><a href="https://wafflehouseindex.live" style="text-decoration:none; color: white">WaffleHouseIndex.live</a></h2>
 	                        <p class="hero-paragraph text-sm">The Waffle House Index is an informal metric named after the Waffle House restaurant chain to determine the effect of a storm and the likely scale of assistance required for disaster recovery. It was coined by former administrator Craig Fugate of the Federal Emergency Management Agency (FEMA). The metric is unofficially used by FEMA to inform disaster response.</p>
-                    <h3 class="hero-title">{% if state_name %}{{ state_name }}{% endif %} Closings: {{ closed_stores.stores|length }}</h3>
                         </div></div>
                             <div hx-target="this"
     hx-get="/hx_progress"
@@ -127,11 +126,14 @@
     <div id="pb" class="progress-bar" style="width:{{closed_stores.current_progress.percent_complete}}">
   </div>
 </div>
-                            </div></div></section>
-<section>
+                            </div></div></section></main></header>
+<section hx-get={% if state %}"/hx_closed?state={{ state }}"{% else %}"/hx_closed"{% endif %}} hx-trigger="every 2s">
 <div class="container">
-<table class="table" hx-get={% if state %}"/hx_closed?state={{ state }}"{% else %}"/hx_closed"{% endif %}} hx-trigger="every 2s">
-  <thead>
+          <h3 class="hero-title">{% if state_name %}{{ state_name }}{% endif %} Closings: {{ closed_stores.stores|length }}</h3>
+
+<table class="table">
+
+    <thead>
     <tr>
       <th scope="col">#</th>
       <th scope="col">State</th>
@@ -146,7 +148,7 @@
       <th scope="row" style="color: #dca325;"><a style="color: #dca325;" target="_blank" href="https://wafflehouse.locally.com/store/{{store.store_id}}">{{ store.name }}</a></th>
       <td>{{ store.state }}</td>
       <td>{{ store.city }}</td>
-      <td>{% if store.status == 'Closed - Closed' %}{{ store.status }}*{% else %}}{{ store.status }}{% endif %}</td>
+      <td>{% if store.status == 'Closed - Closed' %}{{ store.status }}*{% else %}{{ store.status }}{% endif %}</td>
     <td>{{ store.address }}</td>
     </tr>
   {% endfor %}

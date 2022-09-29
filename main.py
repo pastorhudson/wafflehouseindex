@@ -83,11 +83,16 @@ async def percent_complete(request: Request):
 
 
 @app.get("/hx_progress", include_in_schema=False)
-async def hxprogress(request: Request):
+async def hxprogress(request: Request, state: str = None):
+    if state:
+        state_name = abbrev_to_us_state[state.upper()]
+    else:
+        state_name = None
     try:
         progress = json.loads(await redis.get('store_status_percent'))
         return templates.TemplateResponse("partials/progress.html", {"request": request,
                                                                      "percent_complete": progress['percent_complete'],
+                                                                     "state_name": state_name,
                                                                      "last_update": datetime.fromisoformat(progress['last_update'])})
 
     except ValueError:
@@ -97,6 +102,7 @@ async def hxprogress(request: Request):
         }
         return templates.TemplateResponse("partials/progress.html", {"request": request,
                                                                      "percent_complete": progress['percent_complete'],
+                                                                     "state_name": state_name,
                                                                      "last_update": progress['last_update']})
 
 
@@ -175,6 +181,7 @@ async def hx_get_closed_stores(request: Request, state: str = None):
     stores = await get_closed_stores_cache(redis)
     filter_stores = []
     if state:
+        state_name = abbrev_to_us_state[state.upper()]
 
         try:
             for store in stores['stores']:
@@ -184,13 +191,18 @@ async def hx_get_closed_stores(request: Request, state: str = None):
             return templates.TemplateResponse("partials/sites.html", {"request": request,
                                                                       "closed_stores": {"stores": filter_stores},
                                                                       "state": state,
+                                                                      "state_name": state_name,
                                                                       })
         except Exception as e:
             return templates.TemplateResponse("partials/sites.html", {"request": request,
                                                                       "closed_stores": {"stores": filter_stores},
                                                                       "state": state,
+                                                                      "state_name": state_name,
                                                                       })
+    else:
+        state_name = None
     return templates.TemplateResponse("partials/sites.html", {"request": request,
                                                               "closed_stores": await get_closed_stores_cache(redis),
                                                               "state": state,
+                                                              "state_name": state_name,
                                                               })
