@@ -102,36 +102,13 @@
         </header>
 
         <main>
-            <section class="hero">
+             <section class="features section">
                 <div class="container">
-                    <div class="hero-inner">
+                     <div class="hero-inner">
 						<div class="hero-copy">
-	                        <h1 class="hero-title mt-0">Waffle House Index API</h1>
+                    <h1 class="mt-0">WaffleHouseIndex.live</h1>
 	                        <p class="hero-paragraph">This is an unaffiliated hobby project to make Waffle House status easily accessible .</p>
-	                        <div class="hero-cta"><a class="button button-primary" href="/docs">Read The Docs</a><a class="button" href="https://wafflehouse.com">Go To Waffle House</a></div>
-						</div>
-						<div class="hero-figure anime-element">
-							<svg class="placeholder" width="528" height="396" viewBox="0 0 528 396">
-								<rect width="528" height="396" style="fill:transparent;" />
-							</svg>
-							<div class="hero-figure-box hero-figure-box-01" data-rotation="45deg"></div>
-							<div class="hero-figure-box hero-figure-box-02" data-rotation="-45deg"></div>
-							<div class="hero-figure-box hero-figure-box-03" data-rotation="0deg"></div>
-							<div class="hero-figure-box hero-figure-box-04" data-rotation="-135deg"></div>
-							<div class="hero-figure-box hero-figure-box-05"></div>
-							<div class="hero-figure-box hero-figure-box-06"></div>
-							<div class="hero-figure-box hero-figure-box-07"></div>
-							<div class="hero-figure-box hero-figure-box-08" data-rotation="-22deg"></div>
-							<div class="hero-figure-box hero-figure-box-09" data-rotation="-52deg"></div>
-							<div class="hero-figure-box hero-figure-box-10" data-rotation="-50deg"></div>
-						</div>
-                    </div>
-                </div>
-            </section>
-
-            <section class="features section">
-                <div class="container">
-
+                    <h2 class="hero-title">Current Closings: {{ closed_stores|length }}</h2></div></div>
 <table class="table">
   <thead>
     <tr>
@@ -157,18 +134,44 @@
 </table>
                 </div>
             </section>
-
-
-<!--			<section class="cta section">-->
-<!--				<div class="container">-->
-<!--					<div class="cta-inner section-inner">-->
-<!--						<h3 class="section-title mt-0">Still not convinced on buying?</h3>-->
-<!--						<div class="cta-cta">-->
-<!--							<a class="button button-primary button-wide-mobile" href="#">Get in touch</a>-->
+                       <section class="hero">
+                <div class="container">
+                    <div class="hero-inner">
+						<div class="hero-copy">
+	                        <h1 class="hero-title mt-0">Waffle House Index API</h1>
+	                        <p class="hero-paragraph">This is an unaffiliated hobby project to make Waffle House status easily accessible .</p>
+	                        <div class="hero-cta"><a class="button button-primary" href="/docs">Read The Docs</a><a class="button" href="https://wafflehouse.com">Go To Waffle House</a></div>
+						</div>
+<!--						<div class="hero-figure anime-element">-->
+<!--							<svg class="placeholder" width="528" height="396" viewBox="0 0 528 396">-->
+<!--								<rect width="528" height="396" style="fill:transparent;" />-->
+<!--							</svg>-->
+<!--							<div class="hero-figure-box hero-figure-box-01" data-rotation="45deg"></div>-->
+<!--							<div class="hero-figure-box hero-figure-box-02" data-rotation="-45deg"></div>-->
+<!--							<div class="hero-figure-box hero-figure-box-03" data-rotation="0deg"></div>-->
+<!--							<div class="hero-figure-box hero-figure-box-04" data-rotation="-135deg"></div>-->
+<!--							<div class="hero-figure-box hero-figure-box-05"></div>-->
+<!--							<div class="hero-figure-box hero-figure-box-06"></div>-->
+<!--							<div class="hero-figure-box hero-figure-box-07"></div>-->
+<!--							<div class="hero-figure-box hero-figure-box-08" data-rotation="-22deg"></div>-->
+<!--							<div class="hero-figure-box hero-figure-box-09" data-rotation="-52deg"></div>-->
+<!--							<div class="hero-figure-box hero-figure-box-10" data-rotation="-50deg"></div>-->
 <!--						</div>-->
-<!--					</div>-->
-<!--				</div>-->
-<!--			</section>-->
+                    </div>
+                </div>
+            </section>
+
+
+			<section class="cta section">
+				<div class="container">
+					<div class="cta-inner section-inner">
+						<h3 class="section-title mt-0">What is the Waffle House Index?</h3>
+						<div class="cta-cta">
+							<a class="button button-primary button-wide-mobile" href="https://en.wikipedia.org/wiki/Waffle_House_Index">Read More</a>
+						</div>
+					</div>
+				</div>
+			</section>
         </main>
 
         <footer class="site-footer">
