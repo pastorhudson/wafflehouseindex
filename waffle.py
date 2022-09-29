@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 from pydantic import BaseSettings
 from tqdm import tqdm
 import httpx
+from datetime import datetime
 
 
 async def get_stores():
@@ -103,7 +104,8 @@ async def format_data(locations_json: dict, redis) -> list:
 async def write_stores(redis):
     stores_json = await get_stores()
     stores = await format_data(stores_json, redis)
-    await redis.set('stores', json.dumps(stores))
+    closed_stores = {'stores': stores, 'last_updated': datetime.utcnow()}
+    await redis.set('stores_status', json.dumps(closed_stores))
     # with open('stores.csv', 'w', newline='') as csvfile:
     #     fieldnames = ['Store ID', 'Name', 'State', 'City', 'Address', 'Zip', 'Phone', 'Status']
     #     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
@@ -130,7 +132,6 @@ if __name__ == "__main__":
     class Config(BaseSettings):
         # The default URL expects the app to run using Docker and docker-compose.
         redis_url: str = 'redis://127.0.0.1:6379'
-
 
     config = Config()
     redis = aioredis.from_url(config.redis_url, decode_responses=True)
