@@ -11,7 +11,7 @@
   <tbody>
   {% for store in closed_stores.stores|sort(attribute='state') %}
   <tr>
-      <th scope="row" style="color: #dca325;"><a style="color: #dca325;" href="https://wafflehouse.locally.com/store/{{store.store_id}}">{{ store.name }}</a></th>
+      <th scope="row" style="color: #dca325;"><a style="color: #dca325;" target="_blank" href="https://wafflehouse.locally.com/store/{{store.store_id}}">{{ store.name }}</a></th>
       <td>{{ store.state }}</td>
       <td>{{ store.city }}</td>
       <td>{% if store.status == 'Closed - Closed' %}{{ store.status }}*{% else %}{{ store.status }}{% endif %}</td>
