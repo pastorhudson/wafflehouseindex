@@ -125,7 +125,7 @@
     </tr>
   </thead>
   <tbody>
-  {% for store in closed_stores %}
+  {% for store in closed_stores|sort(attribute='state') %}
   <tr>
       <th scope="row">{{ store.name }}</th>
       <td>{{ store.state }}</td>
