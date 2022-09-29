@@ -118,7 +118,9 @@ async def get_closed_stores_cache(redis):
                 closed_stores.append(store)
     except TypeError:
         closed_stores = [{"Still Caching": True}]
-    return set(closed_stores)
+    # print(type(closed_stores))
+    # print(closed_stores)
+    return list({v['store_id']: v for v in closed_stores}.values())
 
 if __name__ == "__main__":
     class Config(BaseSettings):
