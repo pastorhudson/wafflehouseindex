@@ -76,7 +76,7 @@ async def cache_reset(request: Request):
 
 
 @app.get("/stores")
-async def read_stores(state: str = None):
+async def read_stores(state: str = None, page: int = 0, limit: int = 50):
     stores = await get_all_stores_cache(redis)
     filter_stores = []
     if state:
@@ -86,6 +86,24 @@ async def read_stores(state: str = None):
         return {"stores": filter_stores,
                 "last_updates": stores['last_updates'],
                 "current_progress": stores['current_progress']}
+
+    if not page and not state:
+        return {"stores": stores['stores'][0:50],
+                "last_updates": stores['last_updates'],
+                "current_progress": stores['current_progress']}
+    elif not page and state:
+        return {"stores": filter_stores[0:50],
+                "last_updates": stores['last_updates'],
+                "current_progress": stores['current_progress']}
+
+    if page:
+        try:
+            page_offset = page * 50
+            return {"stores": stores[0:page_offset],
+                    "last_updates": stores['last_updates'],
+                    "current_progress": stores['current_progress']}
+        except TypeError:
+            pass
 
     return stores
 
@@ -101,5 +119,14 @@ async def read_item(store_number: int,):
 
 
 @app.get("/stores/closed")
-async def get_closed_stores():
+async def get_closed_stores(state: str = None):
+    stores = await get_closed_stores_cache(redis)
+    filter_stores = []
+    if state:
+        for store in stores['stores']:
+            if store['state'].lower() == state.lower():
+                filter_stores.append(store)
+        return {"stores": filter_stores,
+                "last_updates": stores['last_updates'],
+                "current_progress": stores['current_progress']}
     return await get_closed_stores_cache(redis)
