@@ -65,7 +65,7 @@ async def cache_dump(request: Request):
     return json.loads(await redis.get('_stores'))
 
 
-@app.get("/reset", include_in_schema=False)
+@app.get("/reset_2760792038", include_in_schema=False)
 async def cache_reset(request: Request):
     await redis.delete('_stores')
     await redis.delete('stores')
