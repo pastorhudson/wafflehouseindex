@@ -112,7 +112,6 @@ async def write_stores(redis):
 async def get_single_store_status(store_id: str) -> str:
     async with httpx.AsyncClient() as client:
         status_response = await client.get(f"https://wafflehouse.locally.com/conversion/location/store/{store_id}")
-        # status_response = requests.get(f"https://wafflehouse.locally.com/conversion/location/store/{store_id}")
         if "Closed".lower() in status_response.json()['store_html'].lower():
             store_html = BeautifulSoup(status_response.json()['store_html'], features="html.parser")
             status = f"{store_html.find('span', attrs={'class': 'store-status'}).text} - {store_html.find('span', attrs={'class': 'store-info-subtitle'}).text}"
@@ -125,7 +124,7 @@ async def get_closed_stores_cache(redis):
     closed_stores = []
 
     try:
-        stores = json.loads(await redis.get('_stores'))
+        stores = json.loads(await redis.get('stores'))
 
         for store in stores['stores']:
             if "closed" in store['status'].lower():
@@ -144,7 +143,31 @@ async def get_closed_stores_cache(redis):
         return {"stores": list({v['store_id']: v for v in closed_stores}.values()),
                 "last_updates": datetime.utcnow(),
                 "current_progress": json.loads(await redis.get('store_status_percent'))}
-    except KeyError:
+    except Exception as e:
+        return []
+
+
+async def get_all_stores_cache(redis):
+    stores_list = []
+
+    try:
+        stores = json.loads(await redis.get('stores'))
+
+        for store in stores['stores']:
+            stores_list.append(store)
+    except Exception as e:
+        try:
+            _stores = json.loads(await redis.get('_stores'))
+            for store in _stores['stores']:
+                stores_list.append(store)
+        except TypeError:
+            stores_list = [{"Still Caching": True}]
+
+    try:
+        return {"stores": list({v['store_id']: v for v in stores_list}.values()),
+                "last_updates": datetime.utcnow(),
+                "current_progress": json.loads(await redis.get('store_status_percent'))}
+    except Exception as e:
         return []
 
 if __name__ == "__main__":

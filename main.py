@@ -1,12 +1,13 @@
 import json
 from pydantic import BaseSettings
-from waffle import get_stores, write_stores, get_closed_stores_cache
+from waffle import get_stores, write_stores, get_closed_stores_cache, get_all_stores_cache
 import aioredis
 from fastapi import FastAPI, Request, Depends
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi_utils.tasks import repeat_every
-from fastapi_pagination import Page, add_pagination, paginate, Params
+from fastapi_pagination import Page, paginate, Params
+
 
 description = """
 Waffle House Index API helps show what Waffle Houses are closed in natural disasters.
@@ -15,23 +16,12 @@ Waffle House Index API helps show what Waffle Houses are closed in natural disas
 app = FastAPI(title="Waffle House Index API",
               description=description,
               version="0.0.1",
-              # terms_of_service="http://example.com/terms/",
-              # contact={
-              #     "name": "Deadpoolio the Amazing",
-              #     "url": "http://x-force.example.com/contact/",
-              #     "email": "dp@x-force.example.com",
-              # },
-              # license_info={
-              #     "name": "Apache 2.0",
-              #     "url": "https://www.apache.org/licenses/LICENSE-2.0.html",
-              # },
               )
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 
 class Config(BaseSettings):
-    # The default URL expects the app to run using Docker and docker-compose.
     redis_url: str = 'redis://127.0.0.1:6379'
 
 
@@ -85,16 +75,20 @@ async def cache_reset(request: Request):
     return {"Reset": 'success'}
 
 
-@app.get("/stores", response_model=Page[dict])
-async def read_stores(state: str = None, params: Params = Depends()):
-    stores = await get_stores_cache()
+@app.get("/stores")
+async def read_stores(state: str = None):
+    stores = await get_all_stores_cache(redis)
     filter_stores = []
     if state:
-        for store in stores:
+        for store in stores['stores']:
             if store['state'].lower() == state.lower():
                 filter_stores.append(store)
-        return paginate(filter_stores, params)
-    return paginate(stores, params)
+        return {"stores": filter_stores,
+                "last_updates": stores['last_updates'],
+                "current_progress": stores['current_progress']}
+
+    return stores
+
 
 
 @app.get("/store/{store_number}")
