@@ -120,7 +120,10 @@ async def get_closed_stores_cache(redis):
         closed_stores = [{"Still Caching": True}]
     # print(type(closed_stores))
     # print(closed_stores)
-    return list({v['store_id']: v for v in closed_stores}.values())
+    try:
+        return list({v['store_id']: v for v in closed_stores}.values())
+    except KeyError:
+        return []
 
 if __name__ == "__main__":
     class Config(BaseSettings):
