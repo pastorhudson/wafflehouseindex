@@ -93,6 +93,7 @@ async def write_stores(redis):
     stores_json = await get_stores()
     stores = await format_data(stores_json, redis)
     closed_stores = {'stores': stores, 'last_updated': datetime.utcnow()}
+    await redis.delete('stores_status')
     await redis.set('stores_status', json.dumps(closed_stores))
 
 
@@ -111,7 +112,7 @@ async def get_single_store_status(store_id: str) -> str:
 async def get_closed_stores_cache(redis):
     closed_stores = []
     try:
-        for store in json.loads(await redis.get('_stores')):
+        for store in json.loads(await redis.get('stores_status')):
 
             if "closed" in store['status'].lower():
                 # closed_by_state[store['state']] += [store]

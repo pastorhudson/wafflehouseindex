@@ -45,7 +45,7 @@ async def get_stores_cache():
 
 
 @app.on_event('startup')
-@repeat_every(seconds=60 * 60)  # 5 min
+@repeat_every(seconds=60 * 60)  # 1 hour
 async def startup_event():
     await redis.delete('_stores')
     await redis.delete('stores')
