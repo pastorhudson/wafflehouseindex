@@ -1,6 +1,7 @@
 import asyncio
 import csv
 import json
+from pprint import pprint
 
 import aioredis
 from bs4 import BeautifulSoup
@@ -66,37 +67,28 @@ async def get_stores():
 
 
 async def format_data(locations_json: dict, redis) -> list:
-    stores = []
     for store in tqdm(locations_json['markers']):
         try:
-            _cache = json.loads(await redis.get('_stores' or ""))
-            _cache.append({'Store ID': store['id'],
-                           'Name': store['name'],
-                           'State': store['state'],
-                           'City': store['city'],
-                           'Address': store['address'],
-                           'Zip': store['zip'],
-                           'Phone': store['phone'],
-                           'Status': await get_single_store_status(store['id'])})
+            _cache = json.loads(await redis.get('_stores'))
+            _cache.append({'store_id': store['id'],
+                           'name': store['name'],
+                           'state': store['state'],
+                           'city': store['city'],
+                           'address': store['address'],
+                           'zip': store['zip'],
+                           'phone': store['phone'],
+                           'status': await get_single_store_status(store['id'])})
         except TypeError:
-            _cache = [{'Store ID': store['id'],
-                       'Name': store['name'],
-                       'State': store['state'],
-                       'City': store['city'],
-                       'Address': store['address'],
-                       'Zip': store['zip'],
-                       'Phone': store['phone'],
-                       'Status': await get_single_store_status(store['id'])}]
+            _cache = [{'store_id': store['id'],
+                       'name': store['name'],
+                       'state': store['state'],
+                       'city': store['city'],
+                       'address': store['address'],
+                       'zip': store['zip'],
+                       'phone': store['phone'],
+                       'status': await get_single_store_status(store['id'])}]
+            print("First TIme")
         await redis.set('_stores', json.dumps(_cache))
-
-        # stores.append({'Store ID': store['id'],
-        #                'Name': store['name'],
-        #                'State': store['state'],
-        #                'City': store['city'],
-        #                'Address': store['address'],
-        #                'Zip': store['zip'],
-        #                'Phone': store['phone'],
-        #                'Status': await get_single_store_status(store['id'])})
 
     return json.loads(await redis.get('_stores'))
 
@@ -128,11 +120,12 @@ async def get_single_store_status(store_id: str) -> str:
             return 'Open'
 
 
-async def get_closed_stores_by_state(redis):
+async def get_closed_stores_cache(redis):
     closed_stores = []
     try:
-        for store in json.loads(await redis.get('stores_status')):
-            if "closed".lower() in store['Status'].lower():
+        for store in json.loads(await redis.get('_stores')):
+
+            if "closed" in store['status'].lower():
                 # closed_by_state[store['state']] += [store]
                 closed_stores.append(store)
     except TypeError:
@@ -146,4 +139,5 @@ if __name__ == "__main__":
 
     config = Config()
     redis = aioredis.from_url(config.redis_url, decode_responses=True)
+    redis.flushdb()
     asyncio.run(write_stores(redis))

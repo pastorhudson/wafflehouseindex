@@ -1,6 +1,6 @@
 import json
 from pydantic import BaseSettings
-from waffle import get_stores, write_stores, get_closed_stores_by_state
+from waffle import get_stores, write_stores, get_closed_stores_cache
 import aioredis
 from fastapi import FastAPI, Request, Depends
 from fastapi.staticfiles import StaticFiles
@@ -54,8 +54,18 @@ async def startup_event():
 @app.get("/", include_in_schema=False)
 async def root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request,
-                                                     "closed_stores": await get_closed_stores_by_state(redis)})
+                                                     "closed_stores": await get_closed_stores_cache(redis)})
 
+
+@app.get("/cache", include_in_schema=False)
+async def cache_dump(request: Request):
+    return json.loads(await redis.get('_stores'))
+
+
+@app.get("/reset", include_in_schema=False)
+async def cache_reset(request: Request):
+    redis.set('_storage', {})
+    return json.loads(await redis.get('_stores'))
 
 @app.get("/stores", response_model=Page[dict])
 async def read_stores(state: str = None, params: Params = Depends()):
@@ -82,7 +92,7 @@ async def read_item(store_number: int,):
 async def get_closed_stores():
     closed_stores = []
     try:
-        for store in await redis.get('stores_status'):
+        for store in json.loads(await redis.get('stores_status')):
             if "closed" in store['Status'].lower():
             # if store["sun_time_open"] == 0 or store["sun_time_close"] == 0 or store["mon_time_open"] == 0 or store["mon_time_close"] == 0 or store["tue_time_open"] == 0 or store["tue_time_close"] == 0 or store["wed_time_open"] == 0 or store["wed_time_close"] == 0 or store["thu_time_open"] == 0 or store["thu_time_close"] == 0 or store["fri_time_open"] == 0 or store["fri_time_close"] == 0 or store["sat_time_open"] == 0 or store["sat_time_close"] == 0:
                 closed_stores.append(store)
