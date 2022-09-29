@@ -1,6 +1,6 @@
 import json
 from pydantic import BaseSettings
-from waffle import get_stores
+from waffle import get_stores, write_stores
 import aioredis
 from fastapi import FastAPI, Request, Depends
 from fastapi.staticfiles import StaticFiles
@@ -45,9 +45,10 @@ async def get_stores_cache():
 
 
 @app.on_event('startup')
-@repeat_every(seconds=300)  # 5 min
+@repeat_every(seconds=60 * 60)  # 5 min
 async def startup_event():
-    await redis.set('stores', json.dumps(get_stores()))
+    # await redis.set('stores', json.dumps(get_stores()))
+    await write_stores(redis)
 
 
 @app.get("/", include_in_schema=False)
@@ -78,8 +79,8 @@ async def read_item(store_number: int,):
 
 @app.get("/stores/closed")
 async def get_closed_stores():
+    closed_stores = []
     for store in await get_stores_cache():
-        if store['is_temporarily_closed'] is not None and store['is_temporarily_closed'] != 0:
-            return store
-    else:
-        return {}
+        if store["sun_time_open"] == 0 or store["sun_time_close"] == 0 or store["mon_time_open"] == 0 or store["mon_time_close"] == 0 or store["tue_time_open"] == 0 or store["tue_time_close"] == 0 or store["wed_time_open"] == 0 or store["wed_time_close"] == 0 or store["thu_time_open"] == 0 or store["thu_time_close"] == 0 or store["fri_time_open"] == 0 or store["fri_time_close"] == 0 or store["sat_time_open"] == 0 or store["sat_time_close"] == 0:
+            closed_stores.append(store)
+    return closed_stores

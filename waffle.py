@@ -1,11 +1,15 @@
-import requests
-from pprint import pprint
+import asyncio
 import csv
+import json
+
+import aioredis
 from bs4 import BeautifulSoup
+from pydantic import BaseSettings
 from tqdm import tqdm
+import httpx
 
 
-def get_stores():
+async def get_stores():
     cookies = {
         'lg_session_v1': 'eyJpdiI6IktSeWNVUzBRcDNkT1kwM0NmemxjT216TW1FV1M3YTRaTkZtaytLWUg1R0U9IiwidmFsdWUiOiJQUzVZbmpvWjcyRkJHY29JSDh0Tjl3M1BDY0RKa1wvNnQxUjFxVlZackU1R3BaVngyUzBHb0pGdW1lVHB1QnR2TXFvY3g1SnlFQWZCMm94eFNOMm1xbVE9PSIsIm1hYyI6ImFiOWE1ODQwNmZkNmZlMmM4OGVjNWMwOWEyY2Y0NWIyNTI2N2ExNzZiZTg2YTJhNDJiYWM0NjAxNWU5NjE1ZTQifQ%3D%3D',
     }
@@ -52,58 +56,82 @@ def get_stores():
         'zoom_level': '4',
         'lang': 'en-us',
     }
-
-    response = requests.get('https://wafflehouse.locally.com/stores/conversion_data', params=params, cookies=cookies, headers=headers)
+    async with httpx.AsyncClient() as client:
+        response = await client.get('https://wafflehouse.locally.com/stores/conversion_data', params=params,
+                                    cookies=cookies,
+                                    headers=headers)
 
     return response.json()
 
 
-def format_data(locations_json: dict) -> list:
-
+async def format_data(locations_json: dict, redis) -> list:
     stores = []
     for store in tqdm(locations_json['markers']):
-        stores.append({'Store ID': store['id'],
+        try:
+            _cache = json.loads(await redis.get('_stores' or ""))
+            _cache.append({'Store ID': store['id'],
+                           'Name': store['name'],
+                           'State': store['state'],
+                           'City': store['city'],
+                           'Address': store['address'],
+                           'Zip': store['zip'],
+                           'Phone': store['phone'],
+                           'Status': await get_single_store_status(store['id'])})
+        except TypeError:
+            _cache = [{'Store ID': store['id'],
                        'Name': store['name'],
                        'State': store['state'],
                        'City': store['city'],
                        'Address': store['address'],
                        'Zip': store['zip'],
                        'Phone': store['phone'],
-                       'Status': store['is_temporarily_closed']})
-    return stores
+                       'Status': await get_single_store_status(store['id'])}]
+        await redis.set('_stores', json.dumps(_cache))
+
+        # stores.append({'Store ID': store['id'],
+        #                'Name': store['name'],
+        #                'State': store['state'],
+        #                'City': store['city'],
+        #                'Address': store['address'],
+        #                'Zip': store['zip'],
+        #                'Phone': store['phone'],
+        #                'Status': await get_single_store_status(store['id'])})
+
+    return json.loads(await redis.get('_stores'))
 
 
-def write_stores():
-    stores_json = get_stores()
-    stores = format_data(stores_json)
-    with open('stores.csv', 'w', newline='') as csvfile:
-        fieldnames = ['Store ID', 'Name', 'State', 'City', 'Address', 'Zip', 'Phone', 'Status' ]
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-
-        writer.writeheader()
-        for row in tqdm(stores):
-            writer.writerow(row)
-            # print(f'Store: {row["Store ID"]} - {row["Status"]}')
-
-
-def get_single_store_status(store_id: str) -> str:
-    status_response = requests.get(f"https://wafflehouse.locally.com/conversion/location/store/{store_id}")
-
-    store_html = BeautifulSoup(status_response.json()['store_html'], features="html.parser")
-    return store_html.find('span', attrs={'class': 'store-status'}).text
+async def write_stores(redis):
+    stores_json = await get_stores()
+    stores = await format_data(stores_json, redis)
+    await redis.set('stores', json.dumps(stores))
+    # with open('stores.csv', 'w', newline='') as csvfile:
+    #     fieldnames = ['Store ID', 'Name', 'State', 'City', 'Address', 'Zip', 'Phone', 'Status']
+    #     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+    #
+    #     writer.writeheader()
+    #     for row in tqdm(stores):
+    #         writer.writerow(row)
+    # print(f'Store: {row["Store ID"]} - {row["Status"]}')
 
 
-# def update_status():
-#     updated_stores = []
-#
-#     with open('updated_stores.csv', 'w', newline='') as csvfile:
-#         fieldnames = ['Store ID', 'State', 'City', 'Address', 'Zip', 'Phone', 'Status' ]
-#         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-#
-#         writer.writeheader()
-#         for row in get_stores():
-#             writer.writerow(row)
+async def get_single_store_status(store_id: str) -> str:
+    async with httpx.AsyncClient() as client:
+        status_response = await client.get(f"https://wafflehouse.locally.com/conversion/location/store/{store_id}")
+        # status_response = requests.get(f"https://wafflehouse.locally.com/conversion/location/store/{store_id}")
+        if "Closed".lower() in status_response.json()['store_html'].lower():
+            store_html = BeautifulSoup(status_response.json()['store_html'], features="html.parser")
+            status = f"{store_html.find('span', attrs={'class': 'store-status'}).text} - {store_html.find('span', attrs={'class': 'store-info-subtitle'}).text}"
+            return status
+        else:
+            return 'Open'
 
 
 if __name__ == "__main__":
-    print(write_stores())
+    class Config(BaseSettings):
+        # The default URL expects the app to run using Docker and docker-compose.
+        redis_url: str = 'redis://127.0.0.1:6379'
+
+
+    config = Config()
+    redis = aioredis.from_url(config.redis_url, decode_responses=True)
+    asyncio.run(write_stores(redis))
