@@ -115,7 +115,7 @@
 						<div class="hero-copy">
                     <h2 class="mt-0">WaffleHouseIndex.live</h2>
 	                        <p class="hero-paragraph">This is an unaffiliated hobby project to make Waffle House status easily accessible .</p>
-                    <h3 class="hero-title">{% if state %}{{ state }}{% endif %} Closings: {{ closed_stores.stores|length }}</h3>
+                    <h3 class="hero-title">{% if state_name %}{{ state_name }}{% endif %} Closings: {{ closed_stores.stores|length }}</h3>
                         </div></div>
                             <div hx-target="this"
     hx-get="/hx_progress"
@@ -130,7 +130,7 @@
                             </div></div></section>
 <section>
 <div class="container">
-<table class="table">
+<table class="table" hx-get={% if state %}"/hx_closed?state={{ state }}"{% else %}"/hx_closed"{% endif %}} hx-trigger="every 2s">
   <thead>
     <tr>
       <th scope="col">#</th>

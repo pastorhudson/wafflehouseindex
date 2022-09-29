@@ -60,7 +60,8 @@ async def root(request: Request, state: str = None):
                               "last_updates": stores['last_updates'],
                               "current_progress": stores['current_progress'],
                               },
-            "state": abbrev_to_us_state[state.upper()],
+            "state": state.lower(),
+            "state_name": abbrev_to_us_state[state.upper()],
             "states": abbrev_to_us_state
         })
     stores['state'] = None
@@ -167,3 +168,29 @@ async def get_closed_stores(state: str = None):
                 "last_updates": stores['last_updates'],
                 "current_progress": stores['current_progress']}
     return await get_closed_stores_cache(redis)
+
+
+@app.get("/hx_closed", include_in_schema=False)
+async def hx_get_closed_stores(request: Request, state: str = None):
+    stores = await get_closed_stores_cache(redis)
+    filter_stores = []
+    if state:
+
+        try:
+            for store in stores['stores']:
+
+                if store['state'].lower() == state.lower():
+                    filter_stores.append(store)
+            return templates.TemplateResponse("partials/sites.html", {"request": request,
+                                                                      "closed_stores": {"stores": filter_stores},
+                                                                      "state": state,
+                                                                      })
+        except Exception as e:
+            return templates.TemplateResponse("partials/sites.html", {"request": request,
+                                                                      "closed_stores": {"stores": filter_stores},
+                                                                      "state": state,
+                                                                      })
+    return templates.TemplateResponse("partials/sites.html", {"request": request,
+                                                              "closed_stores": await get_closed_stores_cache(redis),
+                                                              "state": state,
+                                                              })
