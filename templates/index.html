@@ -116,7 +116,8 @@
                     <h2 class="mt-0">WaffleHouseIndex.live</h2>
 	                        <p class="hero-paragraph">This is an unaffiliated hobby project to make Waffle House status easily accessible .</p>
                     <h3 class="hero-title">{% if state %}{{ state }}{% endif %} Closings: {{ closed_stores.stores|length }}</h3>
-                    <div hx-target="this"
+                        </div></div>
+                            <div hx-target="this"
     hx-get="/hx_progress"
     hx-trigger="load delay:600ms"
     hx-swap="outerHTML">
@@ -125,8 +126,10 @@
   <div class="progress">
     <div id="pb" class="progress-bar" style="width:{{closed_stores.current_progress.percent_complete}}">
   </div>
-</div></div>
-
+</div>
+                            </div></div></section>
+<section>
+<div class="container">
 <table class="table">
   <thead>
     <tr>
