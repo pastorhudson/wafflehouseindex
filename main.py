@@ -2,11 +2,11 @@ import json
 from pydantic import BaseSettings
 from waffle import get_stores, write_stores, get_closed_stores_cache, get_all_stores_cache
 import aioredis
-from fastapi import FastAPI, Request, Depends
+from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi_utils.tasks import repeat_every
-from fastapi_pagination import Page, paginate, Params
+from us_state_abbrev import abbrev_to_us_state
 
 
 description = """
@@ -45,9 +45,23 @@ async def startup_event():
 
 
 @app.get("/", include_in_schema=False)
-async def root(request: Request):
+async def root(request: Request, state: str = None):
+    stores = await get_closed_stores_cache(redis)
+    filter_stores = []
+    if state:
+        for store in stores['stores']:
+            if store['state'].lower() == state.lower():
+                filter_stores.append(store)
+        return templates.TemplateResponse('index.html', {
+            "request": request,
+            "closed_stores": {"stores": filter_stores,
+                              "last_updates": stores['last_updates'],
+                              "current_progress": stores['current_progress'],
+                              "state": abbrev_to_us_state[state.upper()]}
+        })
+    stores['state'] = None
     return templates.TemplateResponse("index.html", {"request": request,
-                                                     "closed_stores": await get_closed_stores_cache(redis)})
+                                                     "closed_stores": stores})
 
 
 @app.get("/percent_complete", include_in_schema=False)
@@ -106,7 +120,6 @@ async def read_stores(state: str = None, page: int = 0, limit: int = 50):
             pass
 
     return stores
-
 
 
 @app.get("/store/{store_number}")
