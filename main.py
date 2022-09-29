@@ -49,7 +49,7 @@ async def get_stores_cache():
 async def startup_event():
     await redis.delete('_stores')
     await redis.delete('stores')
-    await redis.set('stores', json.dumps(get_stores()))
+    await redis.set('stores', json.dumps(await get_stores()))
 
     await write_stores(redis)
 
