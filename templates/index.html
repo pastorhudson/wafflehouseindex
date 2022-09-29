@@ -115,7 +115,11 @@
 						<div class="hero-copy">
                     <h2 class="mt-0">WaffleHouseIndex.live</h2>
 	                        <p class="hero-paragraph">This is an unaffiliated hobby project to make Waffle House status easily accessible .</p>
-                    <h3 class="hero-title">Current Closings: {{ closed_stores|length }}</h3></div></div>
+                    <h3 class="hero-title">Current Closings: {{ closed_stores.stores|length }}</h3>
+                        <h4 class="hero-title">Last Updated: {{ closed_stores.last_updates.strftime('%Y-%m-%d %H:%M') }}</h4>
+                            <div class="container">
+    </div>
+                        <p>Current Refresh: {{ closed_stores.current_progress.percent_complete }}</p></div></div>
 <table class="table">
   <thead>
     <tr>
@@ -139,6 +143,7 @@
 
   </tbody>
 </table>
+
                 </div>
             </section>
                        <section class="hero">

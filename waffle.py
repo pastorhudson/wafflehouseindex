@@ -64,26 +64,38 @@ async def get_stores():
 
 
 async def format_data(locations_json: dict, redis) -> list:
-    for store in tqdm(locations_json['markers']):
+    total_stores = len(locations_json['markers'])
+    for index, store in enumerate(locations_json['markers']):
+        # print(index, store)
+        percent = index/total_stores * 1.0
+
+        progress = {"total": total_stores,
+                    "current": index,
+                    "percent_complete": f"{percent:.0%}"
+                    }
+        await redis.set('store_status_percent', json.dumps(progress))
         try:
             _cache = json.loads(await redis.get('_stores'))
-            _cache.append({'store_id': store['id'],
-                           'name': store['name'],
-                           'state': store['state'],
-                           'city': store['city'],
-                           'address': store['address'],
-                           'zip': store['zip'],
-                           'phone': store['phone'],
-                           'status': await get_single_store_status(store['id'])})
+            _cache['stores'].append({'store_id': store['id'],
+                                     'name': store['name'],
+                                     'state': store['state'],
+                                     'city': store['city'],
+                                     'address': store['address'],
+                                     'zip': store['zip'],
+                                     'phone': store['phone'],
+                                     'status': await get_single_store_status(store['id'])})
+            _cache['last_updates'] = datetime.utcnow().isoformat()
         except TypeError:
-            _cache = [{'store_id': store['id'],
-                       'name': store['name'],
-                       'state': store['state'],
-                       'city': store['city'],
-                       'address': store['address'],
-                       'zip': store['zip'],
-                       'phone': store['phone'],
-                       'status': await get_single_store_status(store['id'])}]
+            _cache = {"stores": [{'store_id': store['id'],
+                                  'name': store['name'],
+                                  'state': store['state'],
+                                  'city': store['city'],
+                                  'address': store['address'],
+                                  'zip': store['zip'],
+                                  'phone': store['phone'],
+                                  'status': await get_single_store_status(store['id'])}],
+                      "last_updates": datetime.utcnow().isoformat()
+                      }
         await redis.set('_stores', json.dumps(_cache))
 
     return json.loads(await redis.get('_stores'))
@@ -111,18 +123,27 @@ async def get_single_store_status(store_id: str) -> str:
 
 async def get_closed_stores_cache(redis):
     closed_stores = []
-    try:
-        for store in json.loads(await redis.get('stores_status')):
 
-            if "closed" in store['status'].lower():
-                # closed_by_state[store['state']] += [store]
-                closed_stores.append(store)
-    except TypeError:
-        closed_stores = [{"Still Caching": True}]
-    # print(type(closed_stores))
-    # print(closed_stores)
     try:
-        return list({v['store_id']: v for v in closed_stores}.values())
+        stores = json.loads(await redis.get('_stores'))
+
+        for store in stores['stores']:
+            if "closed" in store['status'].lower():
+                closed_stores.append(store)
+    except Exception as e:
+        try:
+            _stores = json.loads(await redis.get('_stores'))
+            for store in _stores['stores']:
+
+                if "closed" in store['status'].lower():
+                    closed_stores.append(store)
+        except TypeError:
+            closed_stores = [{"Still Caching": True}]
+
+    try:
+        return {"stores": list({v['store_id']: v for v in closed_stores}.values()),
+                "last_updates": datetime.utcnow(),
+                "current_progress": json.loads(await redis.get('store_status_percent'))}
     except KeyError:
         return []
 

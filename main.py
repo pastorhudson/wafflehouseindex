@@ -49,8 +49,8 @@ async def get_stores_cache():
 async def startup_event():
     await redis.delete('_stores')
     await redis.delete('stores')
+    await redis.delete('percent_complete')
     await redis.set('stores', json.dumps(await get_stores()))
-
     await write_stores(redis)
 
 
@@ -58,6 +58,17 @@ async def startup_event():
 async def root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request,
                                                      "closed_stores": await get_closed_stores_cache(redis)})
+
+
+@app.get("/percent_complete", include_in_schema=False)
+async def percent_complete(request: Request):
+    try:
+        return json.loads(await redis.get('store_status_percent'))
+    except ValueError:
+        progress = {"total": None,
+                    "current": None,
+                    "percent_complete": None}
+        return progress
 
 
 @app.get("/cache", include_in_schema=False)
@@ -97,12 +108,4 @@ async def read_item(store_number: int,):
 
 @app.get("/stores/closed")
 async def get_closed_stores():
-    closed_stores = []
-    try:
-        for store in json.loads(await redis.get('stores_status')):
-            if "closed" in store['Status'].lower():
-            # if store["sun_time_open"] == 0 or store["sun_time_close"] == 0 or store["mon_time_open"] == 0 or store["mon_time_close"] == 0 or store["tue_time_open"] == 0 or store["tue_time_close"] == 0 or store["wed_time_open"] == 0 or store["wed_time_close"] == 0 or store["thu_time_open"] == 0 or store["thu_time_close"] == 0 or store["fri_time_open"] == 0 or store["fri_time_close"] == 0 or store["sat_time_open"] == 0 or store["sat_time_close"] == 0:
-                closed_stores.append(store)
-    except TypeError:
-        closed_stores = {"Still Caching": True}
-    return set(closed_stores)
+    return await get_closed_stores_cache(redis)
