@@ -1,8 +1,5 @@
 import asyncio
-import csv
 import json
-from pprint import pprint
-
 import aioredis
 from bs4 import BeautifulSoup
 from pydantic import BaseSettings
@@ -87,7 +84,6 @@ async def format_data(locations_json: dict, redis) -> list:
                        'zip': store['zip'],
                        'phone': store['phone'],
                        'status': await get_single_store_status(store['id'])}]
-            print("First TIme")
         await redis.set('_stores', json.dumps(_cache))
         await redis.save()
 
@@ -100,14 +96,7 @@ async def write_stores(redis):
     closed_stores = {'stores': stores, 'last_updated': datetime.utcnow()}
     await redis.set('stores_status', json.dumps(closed_stores))
     await redis.save()
-    # with open('stores.csv', 'w', newline='') as csvfile:
-    #     fieldnames = ['Store ID', 'Name', 'State', 'City', 'Address', 'Zip', 'Phone', 'Status']
-    #     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-    #
-    #     writer.writeheader()
-    #     for row in tqdm(stores):
-    #         writer.writerow(row)
-    # print(f'Store: {row["Store ID"]} - {row["Status"]}')
+
 
 
 async def get_single_store_status(store_id: str) -> str:
