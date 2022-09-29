@@ -18,7 +18,7 @@
                     <div class="brand header-brand">
                         <h1 class="m-0">
 							<a href="#">
-<!--								<img class="header-logo-image" src="../static/images/logo.svg" alt="Logo">-->
+								<img class="header-logo-image" src="../static/images/logo.svg" alt="Logo">
                             </a>
                         </h1>
                     </div>
@@ -54,9 +54,10 @@
                 </div>
             </section>
 
-<!--            <section class="features section">-->
-<!--                <div class="container">-->
+            <section class="features section">
+                <div class="container">
 <!--					<div class="features-inner section-inner has-bottom-divider">-->
+
 <!--                        <div class="features-wrap">-->
 <!--                            <div class="feature text-center is-revealing">-->
 <!--                                <div class="feature-inner">-->
@@ -113,9 +114,33 @@
 <!--                                </div>-->
 <!--                            </div>-->
 <!--                        </div>-->
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">State</th>
+      <th scope="col">City</th>
+      <th scope="col">Status</th>
+      <th scope="col">Address</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for store in closed_stores %}
+  <tr>
+      <th scope="row">{{ store.name }}</th>
+      <td>{{ store.state }}</td>
+      <td>{{ store.city }}</td>
+      <td>{{ store.status }}</td>
+    <td>{{ store.address }}</td>
+
+    </tr>
+  {% endfor %}
+
+  </tbody>
+</table>
 <!--                    </div>-->
-<!--                </div>-->
-<!--            </section>-->
+                </div>
+            </section>
 
 <!--            <section class="pricing section">-->
 <!--                <div class="container-sm">-->

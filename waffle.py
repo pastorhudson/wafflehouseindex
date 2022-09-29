@@ -128,6 +128,17 @@ async def get_single_store_status(store_id: str) -> str:
             return 'Open'
 
 
+async def get_closed_stores_by_state(redis):
+    closed_stores = []
+    try:
+        for store in json.loads(await redis.get('stores_status')):
+            if "closed".lower() in store['Status'].lower():
+                # closed_by_state[store['state']] += [store]
+                closed_stores.append(store)
+    except TypeError:
+        closed_stores = {"Still Caching": True}
+    return closed_stores
+
 if __name__ == "__main__":
     class Config(BaseSettings):
         # The default URL expects the app to run using Docker and docker-compose.

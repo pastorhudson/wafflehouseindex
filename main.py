@@ -1,6 +1,6 @@
 import json
 from pydantic import BaseSettings
-from waffle import get_stores, write_stores
+from waffle import get_stores, write_stores, get_closed_stores_by_state
 import aioredis
 from fastapi import FastAPI, Request, Depends
 from fastapi.staticfiles import StaticFiles
@@ -53,7 +53,8 @@ async def startup_event():
 
 @app.get("/", include_in_schema=False)
 async def root(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse("index.html", {"request": request,
+                                                     "closed_stores": await get_closed_stores_by_state(redis)})
 
 
 @app.get("/stores", response_model=Page[dict])
