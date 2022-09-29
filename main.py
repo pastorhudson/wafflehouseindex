@@ -71,7 +71,7 @@ async def cache_reset(request: Request):
     await redis.delete('stores')
     await redis.delete('stores_status')
 
-    return json.loads(await redis.get('_stores'))
+    return {"Reset": 'success'}
 
 
 @app.get("/stores", response_model=Page[dict])
