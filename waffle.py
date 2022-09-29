@@ -117,7 +117,7 @@ async def get_closed_stores_cache(redis):
                 # closed_by_state[store['state']] += [store]
                 closed_stores.append(store)
     except TypeError:
-        closed_stores = {"Still Caching": True}
+        closed_stores = [{"Still Caching": True}]
     return set(closed_stores)
 
 if __name__ == "__main__":
