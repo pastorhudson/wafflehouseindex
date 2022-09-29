@@ -40,7 +40,7 @@ redis = aioredis.from_url(config.redis_url, decode_responses=True)
 
 
 async def get_stores_cache():
-    stores = await redis.get('stores')
+    stores = json.loads(await redis.get('stores'))
     return json.loads(stores)['markers']
 
 
