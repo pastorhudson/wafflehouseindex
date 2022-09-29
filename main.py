@@ -57,11 +57,15 @@ async def root(request: Request, state: str = None):
             "closed_stores": {"stores": filter_stores,
                               "last_updates": stores['last_updates'],
                               "current_progress": stores['current_progress'],
-                              "state": abbrev_to_us_state[state.upper()]}
+                              },
+            "state": abbrev_to_us_state[state.upper()],
+            "states": abbrev_to_us_state
         })
     stores['state'] = None
     return templates.TemplateResponse("index.html", {"request": request,
-                                                     "closed_stores": stores})
+                                                     "closed_stores": stores,
+                                                     "state": None,
+                                                     "states": abbrev_to_us_state})
 
 
 @app.get("/percent_complete", include_in_schema=False)
