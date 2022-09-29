@@ -50,7 +50,7 @@ async def startup_event():
     await redis.delete('_stores')
     await redis.delete('stores')
     await redis.set('stores', json.dumps(get_stores()))
-    await redis.save()
+
     await write_stores(redis)
 
 
@@ -70,7 +70,6 @@ async def cache_reset(request: Request):
     await redis.delete('_stores')
     await redis.delete('stores')
     await redis.delete('stores_status')
-    await redis.save()
 
     return json.loads(await redis.get('_stores'))
 

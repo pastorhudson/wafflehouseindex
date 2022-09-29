@@ -85,7 +85,6 @@ async def format_data(locations_json: dict, redis) -> list:
                        'phone': store['phone'],
                        'status': await get_single_store_status(store['id'])}]
         await redis.set('_stores', json.dumps(_cache))
-        await redis.save()
 
     return json.loads(await redis.get('_stores'))
 
@@ -95,8 +94,6 @@ async def write_stores(redis):
     stores = await format_data(stores_json, redis)
     closed_stores = {'stores': stores, 'last_updated': datetime.utcnow()}
     await redis.set('stores_status', json.dumps(closed_stores))
-    await redis.save()
-
 
 
 async def get_single_store_status(store_id: str) -> str:
