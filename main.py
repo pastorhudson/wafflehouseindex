@@ -83,7 +83,7 @@ async def get_closed_stores():
     closed_stores = []
     try:
         for store in await redis.get('stores_status'):
-            if "closed" in store['Sattus'].lower():
+            if "closed" in store['Status'].lower():
             # if store["sun_time_open"] == 0 or store["sun_time_close"] == 0 or store["mon_time_open"] == 0 or store["mon_time_close"] == 0 or store["tue_time_open"] == 0 or store["tue_time_close"] == 0 or store["wed_time_open"] == 0 or store["wed_time_close"] == 0 or store["thu_time_open"] == 0 or store["thu_time_close"] == 0 or store["fri_time_open"] == 0 or store["fri_time_close"] == 0 or store["sat_time_open"] == 0 or store["sat_time_close"] == 0:
                 closed_stores.append(store)
     except TypeError:
