@@ -88,7 +88,7 @@ async def hxprogress(request: Request):
         progress = json.loads(await redis.get('store_status_percent'))
         return templates.TemplateResponse("partials/progress.html", {"request": request,
                                                                      "percent_complete": progress['percent_complete'],
-                                                                     "last_update": datetime.utcnow()})
+                                                                     "last_update": datetime.fromisoformat(progress['last_update'])})
 
     except ValueError:
         progress = {
