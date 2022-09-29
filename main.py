@@ -1,4 +1,6 @@
 import json
+from datetime import datetime
+
 from pydantic import BaseSettings
 from waffle import get_stores, write_stores, get_closed_stores_cache, get_all_stores_cache
 import aioredis
@@ -77,6 +79,24 @@ async def percent_complete(request: Request):
                     "current": None,
                     "percent_complete": None}
         return progress
+
+
+@app.get("/hx_progress", include_in_schema=False)
+async def hxprogress(request: Request):
+    try:
+        progress = json.loads(await redis.get('store_status_percent'))
+        return templates.TemplateResponse("partials/progress.html", {"request": request,
+                                                                     "percent_complete": progress['percent_complete'],
+                                                                     "last_update": datetime.utcnow()})
+
+    except ValueError:
+        progress = {
+                    "percent_complete": None,
+                    "last_update": datetime.utcnow()
+        }
+        return templates.TemplateResponse("partials/progress.html", {"request": request,
+                                                                     "percent_complete": progress['percent_complete'],
+                                                                     "last_update": progress['last_update']})
 
 
 @app.get("/cache", include_in_schema=False)

@@ -116,10 +116,17 @@
                     <h2 class="mt-0">WaffleHouseIndex.live</h2>
 	                        <p class="hero-paragraph">This is an unaffiliated hobby project to make Waffle House status easily accessible .</p>
                     <h3 class="hero-title">{% if state %}{{ state }}{% endif %} Closings: {{ closed_stores.stores|length }}</h3>
-                        <h4 class="hero-title">Last Updated: {{ closed_stores.last_updates.strftime('%Y-%m-%d %H:%M') }} UTC</h4>
-                            <div class="container">
-    </div>
-                        <p>Current Refresh: {{ closed_stores.current_progress.percent_complete }}</p></div></div>
+                    <div hx-target="this"
+    hx-get="/hx_progress"
+    hx-trigger="load delay:600ms"
+    hx-swap="outerHTML">
+<h4 class="hero-title">Last Updated: {{ closed_stores.last_updates.strftime('%Y-%m-%d %H:%M') }} UTC</h4>
+  <p>Running</p>
+  <div class="progress">
+    <div id="pb" class="progress-bar" style="width:{{closed_stores.current_progress.percent_complete}}">
+  </div>
+</div></div>
+
 <table class="table">
   <thead>
     <tr>
@@ -246,6 +253,6 @@
         </footer>
     </div>
 
-    <script src="../static/js/main.min.js"></script>
 </body>
+<script src="https://unpkg.com/htmx.org@1.8.0" integrity="sha384-cZuAZ+ZbwkNRnrKi05G/fjBX+azI9DNOkNYysZ0I/X5ZFgsmMiBXgDZof30F5ofc" crossorigin="anonymous"></script>
 </html>

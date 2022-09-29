@@ -71,7 +71,8 @@ async def format_data(locations_json: dict, redis) -> list:
 
         progress = {"total": total_stores,
                     "current": index,
-                    "percent_complete": f"{percent:.0%}"
+                    "percent_complete": f"{percent:.0%}",
+                    "last_update": datetime.utcnow().isoformat()
                     }
         await redis.set('store_status_percent', json.dumps(progress))
         try:
