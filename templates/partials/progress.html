@@ -2,7 +2,7 @@
     hx-get="/hx_progress"
     hx-trigger="load delay:600ms"
     hx-swap="outerHTML">
-  <h4 class="hero-title">Last Updated: {{ last_update.strftime('%Y-%m-%d %H:%M:%S') }} UTC</h4>
+  <h4 class="hero-title">Last Updated: {{ last_update.strftime('%m-%d %H:%M:%S') }} UTC</h4>
   <p>Refresh {{percent_complete}}</p>
   <div class="progress">
     <div id="pb" class="progress-bar" style="width:{{percent_complete}}">
