@@ -48,6 +48,8 @@ async def get_stores_cache():
 @repeat_every(seconds=60 * 60)  # 5 min
 async def startup_event():
     # await redis.set('stores', json.dumps(get_stores()))
+    await redis.delete('_stores')
+    await redis.save()
     await write_stores(redis)
 
 
@@ -64,8 +66,13 @@ async def cache_dump(request: Request):
 
 @app.get("/reset", include_in_schema=False)
 async def cache_reset(request: Request):
-    redis.set('_storage', {})
+    await redis.delete('_stores')
+    await redis.delete('stores')
+    await redis.delete('stores_status')
+    await redis.save()
+
     return json.loads(await redis.get('_stores'))
+
 
 @app.get("/stores", response_model=Page[dict])
 async def read_stores(state: str = None, params: Params = Depends()):

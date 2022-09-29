@@ -89,6 +89,7 @@ async def format_data(locations_json: dict, redis) -> list:
                        'status': await get_single_store_status(store['id'])}]
             print("First TIme")
         await redis.set('_stores', json.dumps(_cache))
+        await redis.save()
 
     return json.loads(await redis.get('_stores'))
 
@@ -98,6 +99,7 @@ async def write_stores(redis):
     stores = await format_data(stores_json, redis)
     closed_stores = {'stores': stores, 'last_updated': datetime.utcnow()}
     await redis.set('stores_status', json.dumps(closed_stores))
+    await redis.save()
     # with open('stores.csv', 'w', newline='') as csvfile:
     #     fieldnames = ['Store ID', 'Name', 'State', 'City', 'Address', 'Zip', 'Phone', 'Status']
     #     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
