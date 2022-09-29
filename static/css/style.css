@@ -1223,7 +1223,8 @@ button, input, select, textarea, label {
 		-webkit-transform-origin: 0;
 		transform-origin: 0;
 		-webkit-transform: skewY(-12deg);
-		transform: skewY(-12deg)
+		transform: skewY(-12deg);
+		z-index: -1;
 	}
 }
 
@@ -1637,6 +1638,7 @@ button, input, select, textarea, label {
 	margin-right: 16px;
 	background-image: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTUuNiA2LjRMMS42IDQgMCA1LjYgNS42IDEyIDE2IDEuNiAxNC40IDB6IiBmaWxsPSIjMDJDQkIxIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiLz48L3N2Zz4=);
 	background-repeat: no-repeat
+
 }
 
 .pricing-table-cta {
