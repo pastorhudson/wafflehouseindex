@@ -7,7 +7,7 @@
     <title>Waffle House Index API</title>
     <link href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans:400,600" rel="stylesheet">
     <link rel="stylesheet" href="../static/css/style.css">
-	<script src="https://unpkg.com/animejs@3.0.1/lib/anime.min.js"></script>
+<!--	<script src="https://unpkg.com/animejs@3.0.1/lib/anime.min.js"></script>-->
     <script src="https://unpkg.com/scrollreveal@4.0.0/scrollreveal.min.js"></script>
     <style>
     /*
@@ -18,12 +18,14 @@
   /* Force table to not be like tables anymore */
   table, thead, tbody, th, td, tr {
     display: block;
+
   }
   /* Hide table headers (but not display: none;, for accessibility) */
   thead tr {
     position: absolute;
     top: -9999px;
     left: -9999px;
+
   }
   tr {
     margin: 0 0 1rem 0;
@@ -34,9 +36,11 @@
   td {
     /* Behave  like a "row" */
     border: none;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid #ffffff;
     position: relative;
     padding-left: 50%;
+            color: #f1f1ae;
+
   }
   td:before {
     /* Now like a table header */
@@ -85,22 +89,25 @@
 }
     </style>
 </head>
-<body class="is-boxed has-animations">
-    <div class="body-wrap">
+<!--<body class="is-boxed has-animations">-->
+<!--    <div class="body-wrap">-->
+<!--        <header class="site-header">-->
+<!--            <div class="container">-->
+<!--                <div class="site-header-inner">-->
+<!--                    <div class="brand header-brand">-->
+<!--                        <h1 class="m-0">-->
+<!--							<a href="#">-->
+<!--&lt;!&ndash;								<img class="header-logo-image" src="../static/images/logo.svg" alt="Logo">&ndash;&gt;-->
+<!--                            </a>-->
+<!--                        </h1>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </header>-->
+<body>
+<div class="body-wrap">
         <header class="site-header">
             <div class="container">
-                <div class="site-header-inner">
-                    <div class="brand header-brand">
-                        <h1 class="m-0">
-							<a href="#">
-<!--								<img class="header-logo-image" src="../static/images/logo.svg" alt="Logo">-->
-                            </a>
-                        </h1>
-                    </div>
-                </div>
-            </div>
-        </header>
-
         <main>
              <section class="features section">
                 <div class="container">
@@ -122,7 +129,7 @@
   <tbody>
   {% for store in closed_stores|sort(attribute='state') %}
   <tr>
-      <th scope="row">{{ store.name }}</th>
+      <th scope="row" style="color: #dca325;"><a style="color: #dca325;" href="https://wafflehouse.locally.com/store/{{store.store_id}}">{{ store.name }}</a></th>
       <td>{{ store.state }}</td>
       <td>{{ store.city }}</td>
       <td>{{ store.status }}</td>
