@@ -105,4 +105,4 @@ async def get_closed_stores():
                 closed_stores.append(store)
     except TypeError:
         closed_stores = {"Still Caching": True}
-    return closed_stores
+    return set(closed_stores)
