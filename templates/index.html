@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Waffle House Index API</title>
-    <link href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans:400,600" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Mollen+IBM+Plex+Sans:400,600" rel="stylesheet">
     <link rel="stylesheet" href="../static/css/style.css">
 <!--	<script src="https://unpkg.com/animejs@3.0.1/lib/anime.min.js"></script>-->
 <!--    <script src="https://unpkg.com/scrollreveal@4.0.0/scrollreveal.min.js"></script>-->
@@ -159,7 +159,7 @@
                        <section class="hero">
                 <div class="container">
                     <h4>Filter By State</h4>
-                <span>{% for state in states %}<a href="/?state={{state}}">{{ state }}</a> {%endfor%}</span>
+                <span><a href="/">All States</a> {% for state in states %}<a href="/?state={{state}}">{{ state }}</a> {%endfor%}</span>
                 </div>
                        </section>
 
