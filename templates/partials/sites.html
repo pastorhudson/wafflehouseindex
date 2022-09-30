@@ -24,5 +24,9 @@
 
   </tbody>
 </table>
-<p class="text-xs"><a href="/?{% if state %}state={{state}},{% endif %}unfiltered=True">Show sites permanently closed or closed for remodel.</a></p>
-</div>
+    {% if unfiltered %}
+<p class="text-xs"><a href="/?{% if state %}state={{state}},{% endif %}">Hide sites permanently closed or closed for remodel.</a></p>
+    {% else %}
+    <p class="text-xs"><a href="/?{% if state %}state={{state}},{% endif %}unfiltered=True">Show sites permanently closed or closed for remodel.</a></p>
+
+    {% endif %}</div>
