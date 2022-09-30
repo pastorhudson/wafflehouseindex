@@ -10,7 +10,6 @@ from fastapi.templating import Jinja2Templates
 from fastapi_utils.tasks import repeat_every
 from us_state_abbrev import abbrev_to_us_state
 
-
 description = """
 Waffle House Index API helps show what Waffle Houses are closed in natural disasters.
 """
@@ -47,27 +46,16 @@ async def startup_event():
 
 
 @app.get("/", include_in_schema=False)
-async def root(request: Request, state: str = None):
+async def root(request: Request, state: str = None, unfiltered: bool = False):
     stores = await get_closed_stores_cache(redis)
-    filter_stores = []
     if state:
-        for store in stores['stores']:
-            if store['state'].lower() == state.lower():
-                filter_stores.append(store)
-        return templates.TemplateResponse('index.html', {
-            "request": request,
-            "closed_stores": {"stores": filter_stores,
-                              "last_updates": stores['last_updates'],
-                              "current_progress": stores['current_progress'],
-                              },
-            "state": state.lower(),
-            "state_name": abbrev_to_us_state[state.upper()],
-            "states": abbrev_to_us_state
-        })
-    stores['state'] = None
+        stores = filter_states(state, stores)
+    if not unfiltered:
+        filter_permanently_closed(stores)
+
     return templates.TemplateResponse("index.html", {"request": request,
                                                      "closed_stores": stores,
-                                                     "state": None,
+                                                     "state": state,
                                                      "states": abbrev_to_us_state})
 
 
@@ -93,12 +81,13 @@ async def hxprogress(request: Request, state: str = None):
         return templates.TemplateResponse("partials/progress.html", {"request": request,
                                                                      "percent_complete": progress['percent_complete'],
                                                                      "state_name": state_name,
-                                                                     "last_update": datetime.fromisoformat(progress['last_update'])})
+                                                                     "last_update": datetime.fromisoformat(
+                                                                         progress['last_update'])})
 
     except ValueError:
         progress = {
-                    "percent_complete": None,
-                    "last_update": datetime.utcnow()
+            "percent_complete": None,
+            "last_update": datetime.utcnow()
         }
         return templates.TemplateResponse("partials/progress.html", {"request": request,
                                                                      "percent_complete": progress['percent_complete'],
@@ -121,40 +110,17 @@ async def cache_reset(request: Request):
 
 
 @app.get("/stores")
-async def read_stores(state: str = None, page: int = 0, limit: int = 50):
+async def read_stores(state: str = None, unfiltered: bool = False):
     stores = await get_all_stores_cache(redis)
-    filter_stores = []
     if state:
-        for store in stores['stores']:
-            if store['state'].lower() == state.lower():
-                filter_stores.append(store)
-        return {"stores": filter_stores,
-                "last_updates": stores['last_updates'],
-                "current_progress": stores['current_progress']}
-
-    if not page and not state:
-        return {"stores": stores['stores'][0:50],
-                "last_updates": stores['last_updates'],
-                "current_progress": stores['current_progress']}
-    elif not page and state:
-        return {"stores": filter_stores[0:50],
-                "last_updates": stores['last_updates'],
-                "current_progress": stores['current_progress']}
-
-    if page:
-        try:
-            page_offset = page * 50
-            return {"stores": stores[0:page_offset],
-                    "last_updates": stores['last_updates'],
-                    "current_progress": stores['current_progress']}
-        except TypeError:
-            pass
-
+        stores = filter_states(state, stores)
+    if not unfiltered:
+        stores = filter_permanently_closed(stores)
     return stores
 
 
 @app.get("/store/{store_number}")
-async def read_item(store_number: int,):
+async def read_item(store_number: int, ):
     for store in await get_stores_cache():
         if store['name'].split('#')[1] == str(store_number):
             return store
@@ -163,46 +129,65 @@ async def read_item(store_number: int,):
 
 
 @app.get("/stores/closed")
-async def get_closed_stores(state: str = None):
+async def get_closed_stores(state: str = None, unfiltered: bool = False):
     stores = await get_closed_stores_cache(redis)
-    filter_stores = []
     if state:
-        for store in stores['stores']:
-            if store['state'].lower() == state.lower():
-                filter_stores.append(store)
-        return {"stores": filter_stores,
-                "last_updates": stores['last_updates'],
-                "current_progress": stores['current_progress']}
-    return await get_closed_stores_cache(redis)
+        stores = filter_states(state, stores)
+    if not unfiltered:
+        stores = filter_permanently_closed(stores)
+    return stores
 
 
 @app.get("/hx_closed", include_in_schema=False)
-async def hx_get_closed_stores(request: Request, state: str = None):
+async def hx_get_closed_stores(request: Request, state: str = None, unfiltered: bool = False):
     stores = await get_closed_stores_cache(redis)
-    filter_stores = []
     if state:
+        stores = filter_states(state, stores)
         state_name = abbrev_to_us_state[state.upper()]
-
-        try:
-            for store in stores['stores']:
-
-                if store['state'].lower() == state.lower():
-                    filter_stores.append(store)
-            return templates.TemplateResponse("partials/sites.html", {"request": request,
-                                                                      "closed_stores": {"stores": filter_stores},
-                                                                      "state": state,
-                                                                      "state_name": state_name,
-                                                                      })
-        except Exception as e:
-            return templates.TemplateResponse("partials/sites.html", {"request": request,
-                                                                      "closed_stores": {"stores": filter_stores},
-                                                                      "state": state,
-                                                                      "state_name": state_name,
-                                                                      })
+        # state_name = abbrev_to_us_state[state.upper()]
+        #
+        # try:
+        #     for store in stores['stores']:
+        #
+        #         if store['state'].lower() == state.lower():
+        #             filter_stores.append(store)
+        #     return templates.TemplateResponse("partials/sites.html", {"request": request,
+        #                                                               "closed_stores": {"stores": filter_stores},
+        #                                                               "state": state,
+        #                                                               "state_name": state_name,
+        #                                                               })
+        # except Exception as e:
+        #     return templates.TemplateResponse("partials/sites.html", {"request": request,
+        #                                                               "closed_stores": {"stores": filter_stores},
+        #                                                               "state": state,
+        #                                                               "state_name": state_name,
+        #                                                               })
     else:
         state_name = None
+    if not unfiltered:
+        stores = filter_permanently_closed(stores)
     return templates.TemplateResponse("partials/sites.html", {"request": request,
-                                                              "closed_stores": await get_closed_stores_cache(redis),
+                                                              "closed_stores": stores,
                                                               "state": state,
                                                               "state_name": state_name,
                                                               })
+
+
+def filter_states(state: str = None, stores: list = None) -> list:
+    filtered_stores = []
+    if state:
+        for store in stores['stores']:
+            if store['state'].lower() == state.lower():
+                filtered_stores.append(store)
+        stores['stores'] = filtered_stores
+    return stores
+
+
+def filter_permanently_closed(stores: list = None) -> list:
+    filtered_stores = []
+
+    for store in stores['stores']:
+        if store['status'].lower() != "closed - closed":
+            filtered_stores.append(store)
+        stores['stores'] = filtered_stores
+    return stores
