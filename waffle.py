@@ -2,6 +2,7 @@ import asyncio
 import json
 import aioredis
 from bs4 import BeautifulSoup
+from httpcore import ReadTimeout
 from pydantic import BaseSettings
 from tqdm import tqdm
 import httpx
@@ -55,12 +56,17 @@ async def get_stores():
         'zoom_level': '4',
         'lang': 'en-us',
     }
-    async with httpx.AsyncClient() as client:
-        response = await client.get('https://wafflehouse.locally.com/stores/conversion_data', params=params,
-                                    cookies=cookies,
-                                    headers=headers)
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get('https://wafflehouse.locally.com/stores/conversion_data', params=params,
+                                        # cookies=cookies,
+                                        headers=headers)
 
-    return response.json()
+        return response.json()
+    except httpx.ReadTimeout:
+        return []
+
+
 
 
 async def format_data(locations_json: dict, redis) -> list:
@@ -131,6 +137,7 @@ async def get_closed_stores_cache(redis):
             if "closed" in store['status'].lower():
                 closed_stores.append(store)
     except Exception as e:
+        print(type(e))
         try:
             _stores = json.loads(await redis.get('_stores'))
             for store in _stores['stores']:
@@ -145,8 +152,18 @@ async def get_closed_stores_cache(redis):
                 "last_updates": datetime.utcnow(),
                 "current_progress": json.loads(await redis.get('store_status_percent'))}
     except Exception as e:
-        return []
+        return {"stores": [],
+                "last_updates": datetime.utcnow(),
+                "current_progress": error_current_status()}
 
+
+def error_current_status():
+    progress = {"total": 0,
+                "current": 0,
+                "percent_complete": f"ERROR",
+                "last_update": datetime.utcnow().isoformat()
+                }
+    return progress
 
 async def get_all_stores_cache(redis):
     stores_list = []
@@ -178,5 +195,7 @@ if __name__ == "__main__":
 
     config = Config()
     redis = aioredis.from_url(config.redis_url, decode_responses=True)
-    redis.flushdb()
-    asyncio.run(write_stores(redis))
+    # redis.flushdb()
+    # asyncio.run(write_stores(redis))
+
+    print(asyncio.run(get_closed_stores_cache(redis)))

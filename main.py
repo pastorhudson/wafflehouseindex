@@ -1,6 +1,7 @@
 import json
 from datetime import datetime
 
+import httpx
 from pydantic import BaseSettings
 from waffle import get_stores, write_stores, get_closed_stores_cache, get_all_stores_cache
 import aioredis
@@ -48,15 +49,23 @@ async def startup_event():
 @app.get("/", include_in_schema=False)
 async def root(request: Request, state: str = None, unfiltered: bool = False):
     stores = await get_closed_stores_cache(redis)
-    if state:
-        stores = filter_states(state, stores)
-    if not unfiltered:
-        filter_permanently_closed(stores)
 
-    return templates.TemplateResponse("index.html", {"request": request,
-                                                     "closed_stores": stores,
-                                                     "state": state,
-                                                     "states": abbrev_to_us_state})
+    if stores:
+        if state:
+            stores = filter_states(state, stores)
+        if not unfiltered:
+            filter_permanently_closed(stores)
+
+        return templates.TemplateResponse("index.html", {"request": request,
+                                                         "closed_stores": stores,
+                                                         "state": state,
+                                                         "states": abbrev_to_us_state})
+    else:
+        return templates.TemplateResponse("index.html", {"request": request,
+                                                         "closed_stores": stores,
+                                                         "state": None,
+                                                         "states": None})
+
 
 
 @app.get("/percent_complete", include_in_schema=False)
@@ -141,36 +150,28 @@ async def get_closed_stores(state: str = None, unfiltered: bool = False):
 @app.get("/hx_closed", include_in_schema=False)
 async def hx_get_closed_stores(request: Request, state: str = None, unfiltered: bool = False):
     stores = await get_closed_stores_cache(redis)
-    if state:
-        stores = filter_states(state, stores)
-        state_name = abbrev_to_us_state[state.upper()]
-        # state_name = abbrev_to_us_state[state.upper()]
-        #
-        # try:
-        #     for store in stores['stores']:
-        #
-        #         if store['state'].lower() == state.lower():
-        #             filter_stores.append(store)
-        #     return templates.TemplateResponse("partials/sites.html", {"request": request,
-        #                                                               "closed_stores": {"stores": filter_stores},
-        #                                                               "state": state,
-        #                                                               "state_name": state_name,
-        #                                                               })
-        # except Exception as e:
-        #     return templates.TemplateResponse("partials/sites.html", {"request": request,
-        #                                                               "closed_stores": {"stores": filter_stores},
-        #                                                               "state": state,
-        #                                                               "state_name": state_name,
-        #                                                               })
+    print(stores)
+    if stores['stores']:
+        print("I HAVE STORES")
+        if state:
+            stores = filter_states(state, stores)
+            state_name = abbrev_to_us_state[state.upper()]
+
+        else:
+            state_name = None
+        if not unfiltered:
+            stores = filter_permanently_closed(stores)
+        return templates.TemplateResponse("partials/sites.html", {"request": request,
+                                                                  "closed_stores": stores,
+                                                                  "state": state,
+                                                                  "state_name": state_name,
+                                                                  })
     else:
-        state_name = None
-    if not unfiltered:
-        stores = filter_permanently_closed(stores)
-    return templates.TemplateResponse("partials/sites.html", {"request": request,
-                                                              "closed_stores": stores,
-                                                              "state": state,
-                                                              "state_name": state_name,
-                                                              })
+        return templates.TemplateResponse("partials/sites.html", {"request": request,
+                                                                  "closed_stores": stores,
+                                                                  "state": state,
+                                                                  "state_name": None,
+                                                                  })
 
 
 def filter_states(state: str = None, stores: list = None) -> list:

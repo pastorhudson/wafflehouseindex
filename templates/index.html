@@ -120,7 +120,10 @@
     hx-get="/hx_progress"
     hx-trigger="load delay:600ms"
     hx-swap="outerHTML">
+                                {% if closed_stores.last_updates %}
+
 <h4 class="hero-title">Last Updated: {{ closed_stores.last_updates.strftime('%m-%d %H:%M') }} UTC</h4>
+                                {% endif %}
   <p>Running</p>
   <div class="progress">
     <div id="pb" class="progress-bar" style="width:{{closed_stores.current_progress.percent_complete}}">
