@@ -114,6 +114,7 @@ async def cache_reset(request: Request):
     await redis.delete('_stores')
     await redis.delete('stores')
     await redis.delete('stores_status')
+    await redis.delete('percent_complete')
 
     return {"Reset": 'success'}
 
