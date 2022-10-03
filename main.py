@@ -185,9 +185,12 @@ def filter_states(state: str = None, stores: list = None) -> list:
 
 def filter_permanently_closed(stores: list = None) -> list:
     filtered_stores = []
-
-    for store in stores['stores']:
-        if store['status'].lower() != "closed - closed":
-            filtered_stores.append(store)
-        stores['stores'] = filtered_stores
+    try:
+        for store in stores['stores']:
+            if store['status'].lower() != "closed - closed":
+                filtered_stores.append(store)
+            stores['stores'] = filtered_stores
+        return stores
+    except Exception as e:
+        print(e)
     return stores
