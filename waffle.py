@@ -57,7 +57,7 @@ async def get_stores():
         'lang': 'en-us',
     }
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(verify=False) as client:
             response = await client.get('https://wafflehouse.locally.com/stores/conversion_data', params=params,
                                         # cookies=cookies,
                                         headers=headers)
