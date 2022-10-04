@@ -59,13 +59,16 @@ async def root(request: Request, state: str = None, unfiltered: bool = False):
         return templates.TemplateResponse("index.html", {"request": request,
                                                          "closed_stores": stores,
                                                          "state": state,
-                                                         "states": abbrev_to_us_state})
+                                                         "states": abbrev_to_us_state,
+                                                         "unfiltered": unfiltered
+                                                         })
     else:
         return templates.TemplateResponse("index.html", {"request": request,
                                                          "closed_stores": stores,
                                                          "state": None,
-                                                         "states": None})
-
+                                                         "states": None,
+                                                         "unfiltered": unfiltered
+                                                         })
 
 
 @app.get("/percent_complete", include_in_schema=False)
@@ -151,7 +154,6 @@ async def get_closed_stores(state: str = None, unfiltered: bool = False):
 @app.get("/hx_closed", include_in_schema=False)
 async def hx_get_closed_stores(request: Request, state: str = None, unfiltered: bool = False):
     stores = await get_closed_stores_cache(redis)
-    print(stores)
     if stores['stores']:
         print("I HAVE STORES")
         if state:
@@ -166,12 +168,14 @@ async def hx_get_closed_stores(request: Request, state: str = None, unfiltered: 
                                                                   "closed_stores": stores,
                                                                   "state": state,
                                                                   "state_name": state_name,
+                                                                  "unfiltered": unfiltered
                                                                   })
     else:
         return templates.TemplateResponse("partials/sites.html", {"request": request,
                                                                   "closed_stores": stores,
                                                                   "state": state,
                                                                   "state_name": None,
+                                                                  "unfiltered": unfiltered
                                                                   })
 
 

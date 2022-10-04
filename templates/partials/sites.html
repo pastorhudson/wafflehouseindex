@@ -1,7 +1,7 @@
 <div class="container" >
 
 <h3 class="hero-title">{% if state_name %}{{ state_name }}{% endif %} Closings: {{ closed_stores.stores|length }}</h3>
-<table class="table" hx-get="/hx_closed?state={{state}}" hx-trigger="every 2s">
+<table class="table" hx-get="/hx_closed?{% if state %}state={{ state }}{% endif %}}{% if unfiltered %}unfiltered={{ unfiltered }}{% endif %}}" hx-trigger="every 2s">
   <thead>
     <tr>
       <th scope="col">#</th>

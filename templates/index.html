@@ -130,7 +130,7 @@
   </div>
 </div>
                             </div></div></section></main></header>
-<section hx-get={% if state %}"/hx_closed?state={{ state }}"{% else %}"/hx_closed"{% endif %}} hx-trigger="every 2s">
+<section hx-get="/hx_closed?{% if state %}state={{ state }}{% endif %}}{% if unfiltered %}unfiltered={{ unfiltered }}{% endif %}}" hx-trigger="every 2s">
 <div class="container">
           <h3 class="hero-title">{% if state_name %}{{ state_name }}{% endif %} Closings: {{ closed_stores.stores|length }}</h3>
 
