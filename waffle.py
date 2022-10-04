@@ -117,7 +117,7 @@ async def write_stores(redis):
 
 
 async def get_single_store_status(store_id: str) -> str:
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(verify=False) as client:
         status_response = await client.get(f"https://wafflehouse.locally.com/conversion/location/store/{store_id}")
         if "Closed".lower() in status_response.json()['store_html'].lower():
             store_html = BeautifulSoup(status_response.json()['store_html'], features="html.parser")
